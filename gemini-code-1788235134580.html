@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teka Teki Silang Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .crossword-board {
+            display: grid;
+            grid-template-columns: repeat(5, 40px);
+            grid-template-rows: repeat(5, 40px);
+            gap: 2px;
+            background-color: #333;
+            padding: 2px;
+            border: 2px solid #333;
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .cell.black {
+            background-color: #000;
+        }
+
+        .cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .cell input:focus {
+            background-color: #e0f7fa;
+        }
+
+        .number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 10px;
+            color: #555;
+            pointer-events: none;
+        }
+
+        .clues {
+            max-width: 300px;
+        }
+
+        .clues h3 {
+            margin-bottom: 5px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Teka Teki Silang Sederhana</h1>
+
+    <div class="main-container">
+        <div class="crossword-board" id="board"></div>
+
+        <div class="clues">
+            <h3>Mendatar:</h3>
+            <ol>
+                <li value="1">Ibu kota Negara Indonesia (JAKARTA)</li>
+                <li value="3">Satelit alami Bumi (BULAN)</li>
+            </ol>
+
+            <h3>Menurun:</h3>
+            <ul>
+                <li><strong>1.</strong> Hewan leher panjang (JERAPAH)</li>
+                <li><strong>2.</strong> Kertas pembayaran resmi (UANG)</li>
+            </ul>
+        </div>
+    </div>
+
+    <button onclick="checkAnswers()">Cek Jawaban</button>
+    <div id="result"></div>
+
+    <script>
+        // Desain Papan 5x5
+        // '0' = kotak hitam, huruf = jawaban benar
+        const gridAnswer = [
+            ['J', 'A', 'K', 'A', 'R', 'T', 'A'], // Diwakilkan dalam skema baris
+        ];
+
+        // Layout sederhana 5x5:
+        // Row 0: J A K A R T A (7 kolom) -> Sesuaikan grid 5x5 contoh sederhana:
+        const boardLayout = [
+            ['J', 'A', 'V', 'A', '0'],
+            ['E', '0', 'A', '0', '0'],
+            ['R', 'A', 'N', 'G', '0'],
+            ['A', '0', 'G', '0', '0'],
+            ['M', 'U', 'S', 'I', 'K']
+        ];
+
+        const boardElement = document.getElementById('board');
+
+        // Buat Elemen Papan
+        boardLayout.forEach((row, r) => {
+            row.forEach((char, c) => {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+
+                if (char === '0') {
+                    cell.classList.add('black');
+                } else {
+                    const input = document.createElement('input');
+                    input.maxLength = 1;
+                    input.dataset.row = r;
+                    input.dataset.col = c;
+                    input.dataset.answer = char;
+
+                    // Auto-focus ke input berikutnya
+                    input.addEventListener('input', (e) => {
+                        if (e.target.value.length === 1) {
+                            const nextInput = findNextInput(r, c);
+                            if (nextInput) nextInput.focus();
+                        }
+                    });
+
+                    cell.appendChild(input);
+                }
+                boardElement.appendChild(cell);
+            });
+        });
+
+        function findNextInput(r, c) {
+            const inputs = Array.from(document.querySelectorAll('.cell input'));
+            const currentIndex = inputs.findIndex(i => i.dataset.row == r && i.dataset.col == c);
+            return inputs[currentIndex + 1] || null;
+        }
+
+        function checkAnswers() {
+            const inputs = document.querySelectorAll('.cell input');
+            let isCorrect = true;
+
+            inputs.forEach(input => {
+                if (input.value.toUpperCase() === input.dataset.answer) {
+                    input.style.backgroundColor = '#d4edda'; // Hijau jika benar
+                } else {
+                    input.style.backgroundColor = '#f8d7da'; // Merah jika salah
+                    isCorrect = false;
+                }
+            });
+
+            const resultDiv = document.getElementById('result');
+            if (isCorrect) {
+                resultDiv.textContent = "Selamat! Semua jawaban benar!";
+                resultDiv.style.color = "green";
+            } else {
+                resultDiv.textContent = "Ada jawaban yang masih salah. Coba lagi!";
+                resultDiv.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
